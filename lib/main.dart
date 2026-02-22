@@ -1143,15 +1143,29 @@ class ReceiptPage extends StatelessWidget {
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.orange[800]),
 
                 onPressed: () async {
-                  // 1) ไปหน้า ThankYou ก่อน
-                  await Navigator.push(
+                  // ไปหน้า ThankYou และรอผลจากปุ่ม "จ้าาา"
+                  final goReset = await Navigator.push<bool>(
                     context,
                     MaterialPageRoute(builder: (_) => const ThankYouPage()),
                   );
+
+                  // ถ้าไม่ได้กด "จ้าาา" ก็ไม่ทำอะไรต่อ
+                  if (goReset != true) return;
+                  if (!context.mounted) return;
+
+                  // ไปหน้า Preload ก่อน
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const PreloadPage(message: 'กำลังรีเซ็ต...')),
+                    MaterialPageRoute(
+                      builder: (_) => const PreloadPage(message: 'กำลังรีเซ็ต...'),
+                    ),
                   );
+
+                  // หน่วงให้เห็น Preload
+                  await Future.delayed(const Duration(milliseconds: 900));
+                  if (!context.mounted) return;
+
+                  // รีเซ็ตกลับหน้าเริ่มต้น (Login)
                   Navigator.of(context).pushAndRemoveUntil(
                     MaterialPageRoute(builder: (_) => const LoginPage()),
                         (route) => false,
@@ -1216,7 +1230,7 @@ class ThankYouPage extends StatelessWidget {
                 width: double.infinity,
                 height: 48,
                 child: ElevatedButton(
-                  onPressed: () => Navigator.pop(context), // ✅ ปิด ThankYou กลับไปให้ปุ่มเสร็จสิ้นทำงานต่อ
+                  onPressed: () => Navigator.pop(context, true), // ✅ ปิด ThankYou กลับไปให้ปุ่มเสร็จสิ้นทำงานต่อ
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.pinkAccent),
                   child: const Text('จ้าาา'),
                 ),
